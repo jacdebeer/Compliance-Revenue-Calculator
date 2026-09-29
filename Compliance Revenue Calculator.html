@@ -1,0 +1,187 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Compliance Revenue Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: two-panel worksheet. Left = inputs (clients, services, route), right = the ledger result. Stacks on phones. */
+:root{
+  --bg:#f3f5f2; --panel:#ffffff; --ink:#15261f; --muted:#5b6b63; --line:#d7ddd8;
+  --accent:#0f6b4f; --accent-soft:#e2f0ea; --gold:#b7791f; --neg:#b3261e;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1714; --panel:#17221e; --ink:#e7efea; --muted:#9aaba2; --line:#2a3a33;
+  --accent:#4cc79a; --accent-soft:#1d3a2f; --gold:#e0a84a; --neg:#f28b82; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1714; --panel:#17221e; --ink:#e7efea; --muted:#9aaba2; --line:#2a3a33;
+  --accent:#4cc79a; --accent-soft:#1d3a2f; --gold:#e0a84a; --neg:#f28b82; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body)}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:32px 48px}
+header{display:grid;gap:10px;margin-bottom:28px;max-width:760px}
+.eyebrow{font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,5vw,44px)/1.08 var(--display);margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:22px;min-width:0}
+h2{font:600 13px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.clients{display:grid;gap:8px}
+.clients-row{display:flex;align-items:center;gap:14px}
+.clients-row input[type=range]{flex:1;accent-color:var(--accent)}
+.clients-row input[type=number]{width:84px;font:600 18px var(--mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);text-align:right}
+.svc{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.svc:first-of-type{border-top:0}
+.svc input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);margin:0}
+.svc label{font-weight:500;cursor:pointer}
+.svc .fee{font:500 13px var(--mono);color:var(--muted);text-align:right;white-space:nowrap}
+.svc .sub{grid-column:2 / 4;font-size:13px;color:var(--muted)}
+.route{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.route button{font:inherit;text-align:left;padding:12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer;display:grid;gap:2px}
+.route button strong{font-weight:600}
+.route button span{font-size:13px;color:var(--muted)}
+.route button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.hero-num{display:grid;gap:4px}
+.hero-num .lbl{font-size:13px;color:var(--muted)}
+.hero-num .big{font:800 clamp(38px,7vw,58px)/1 var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+.hero-num .per{font:500 14px var(--mono);color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td{padding:8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td.n{text-align:right;font:500 14px var(--mono);white-space:nowrap;padding-left:12px}
+tr.total td{border-bottom:0;border-top:2px solid var(--ink);font-weight:600;padding-top:10px}
+tr.total td.n{font-weight:600;color:var(--accent)}
+.neg{color:var(--neg)}
+.compare{font-size:14px;background:var(--accent-soft);border-radius:8px;padding:12px 14px}
+.cta{display:grid;gap:10px}
+.cta a{display:inline-block;text-align:center;background:var(--accent);color:var(--panel);text-decoration:none;font-weight:600;padding:13px 18px;border-radius:8px}
+.cta p{margin:0;font-size:13px;color:var(--muted)}
+.notes{margin-top:28px;font-size:12.5px;color:var(--muted);display:grid;gap:6px;max-width:80ch}
+.notes p{margin:0}
+.brands{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.brands b{color:var(--ink);font-weight:600}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">For South African accounting practices</div>
+    <h1>Your clients already ask you about compliance. Bill for it.</h1>
+    <p>Tick the services your business clients need, choose how you want to deliver them, and see what the extra work is worth to your practice.</p>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-label="Your practice">
+      <div class="clients">
+        <h2>Business clients</h2>
+        <div class="clients-row">
+          <input type="range" id="clientsRange" min="5" max="500" step="5" value="50" aria-label="Number of business clients">
+          <input type="number" id="clientsNum" min="1" max="5000" value="50" aria-label="Number of business clients">
+        </div>
+      </div>
+
+      <div>
+        <h2>Services to offer</h2>
+        <div id="services"></div>
+      </div>
+
+      <div>
+        <h2>How you deliver</h2>
+        <div class="route" role="group" aria-label="Delivery route">
+          <button type="button" id="r1" aria-pressed="true"><strong>My team does it</strong><span>Elevate Business Academy training, tools and templates. CIPC filings through InfoDocs.</span></button>
+          <button type="button" id="r2" aria-pressed="false"><strong>Do it for me</strong><span>LexNova delivers the work. You keep the client and invoice them.</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel result" aria-live="polite" aria-label="Your result">
+      <div class="hero-num">
+        <span class="lbl">Additional profit for your practice</span>
+        <span class="big" id="profit">R0</span>
+        <span class="per" id="perClient"></span>
+      </div>
+      <table>
+        <tbody id="ledger"></tbody>
+      </table>
+      <div class="compare" id="compare"></div>
+      <div class="cta">
+        <a href="https://ebac.co.za" target="_blank" rel="noopener">Get the Compliance Revenue Kit</a>
+        <p>Service menu, client letter and templates to start offering these services this month.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="notes">
+    <div class="brands"><span><b>Elevate Business Academy</b> trains and equips your team</span><span><b>LexNova SA</b> does the work for you</span><span><b>InfoDocs</b> CIPC specialist partner</span></div>
+    <p>Figures are once-off income from offering each ticked service once to the number of clients shown. Amounts in rand, including VAT where the provider charges VAT. CIPC government fees are excluded and passed on to the client at cost.</p>
+    <p>Suggested client fees are market-related guides. You set your own fees. Elevate Business Academy membership is R499 per month and covers all training, tools, apps, templates and head-office support. InfoDocs prices are pay-as-you-go rates for companies with turnover up to R1 million. LexNova partner prices are 25% below LexNova's published rates.</p>
+    <p>Elevate Business Academy is a referral partner of InfoDocs and earns a commission on InfoDocs services purchased through its referrals.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Retail = LexNova published price (incl. VAT). Client fee default = 2 x partner price (25% off retail).
+  var SERVICES=[
+    {id:"ar",  name:"CIPC annual return",               note:"Every company, every year",               retail:650,  infodocs:199},
+    {id:"bo",  name:"Beneficial ownership filing",      note:"Required with the annual return",         retail:900,  infodocs:399},
+    {id:"paia",name:"PAIA manual",                      note:"Compulsory for every private body",        retail:1750, infodocs:0},
+    {id:"io",  name:"Information Officer registration", note:"POPIA registration with the Regulator",    retail:900,  infodocs:0}
+  ];
+  var DISC=0.25, EBAC_YEAR=499*12;
+  var route=1, ticked={ar:true,bo:true,paia:true,io:true};
+  var fmt=function(v){var s=Math.round(Math.abs(v)).toLocaleString("en-ZA").replace(/,/g," ");return (v<0?"-R":"R")+s;};
+  var clientFee=function(s){return s.retail*(1-DISC)*2;};
+
+  var box=document.getElementById("services");
+  SERVICES.forEach(function(s){
+    var d=document.createElement("div");d.className="svc";
+    d.innerHTML='<input type="checkbox" id="chk-'+s.id+'" checked><label for="chk-'+s.id+'">'+s.name+'</label><span class="fee">'+fmt(clientFee(s))+' / client</span><span class="sub">'+s.note+'</span>';
+    box.appendChild(d);
+    d.querySelector("input").addEventListener("change",function(e){ticked[s.id]=e.target.checked;render();});
+  });
+
+  var range=document.getElementById("clientsRange"), num=document.getElementById("clientsNum");
+  function setN(v){v=Math.max(1,Math.min(5000,parseInt(v,10)||1));num.value=v;range.value=Math.min(500,v);render();}
+  range.addEventListener("input",function(){setN(range.value);});
+  num.addEventListener("input",function(){setN(num.value);});
+
+  function calc(r,n){
+    var sel=SERVICES.filter(function(s){return ticked[s.id];});
+    var rev=0,cost=0,rows=[];
+    sel.forEach(function(s){rev+=clientFee(s)*n;});
+    if(r===1){
+      var inf=0;sel.forEach(function(s){inf+=s.infodocs*n;});
+      if(inf) rows.push(["InfoDocs CIPC filings",-inf]);
+      if(sel.length) rows.push(["Elevate Business Academy membership, 12 months",-EBAC_YEAR]);
+      cost=inf+(sel.length?EBAC_YEAR:0);
+    } else {
+      var lx=0;sel.forEach(function(s){lx+=s.retail*(1-DISC)*n;});
+      if(lx) rows.push(["LexNova partner fees (25% off)",-lx]);
+      cost=lx;
+    }
+    return {rev:rev,cost:cost,profit:rev-cost,rows:rows,count:sel.length};
+  }
+
+  function render(){
+    var n=parseInt(num.value,10)||1, a=calc(route,n), b=calc(route===1?2:1,n);
+    document.getElementById("profit").textContent=fmt(a.profit);
+    document.getElementById("perClient").textContent=a.count?fmt(a.profit/n)+" per client":"Tick at least one service";
+    var html='<tr><td>Billed to '+n+' clients</td><td class="n">'+fmt(a.rev)+'</td></tr>';
+    a.rows.forEach(function(r){html+='<tr><td>'+r[0]+'</td><td class="n neg">'+fmt(r[1])+'</td></tr>';});
+    html+='<tr class="total"><td>Your profit</td><td class="n">'+fmt(a.profit)+'</td></tr>';
+    document.getElementById("ledger").innerHTML=html;
+    var other=route===1?"having LexNova do it for you":"doing it in-house with Elevate Business Academy";
+    document.getElementById("compare").textContent=a.count?("By "+other+", the same clients bring "+fmt(b.profit)+". "+(route===1?"LexNova route: no staff time needed.":"In-house route: your team's time is the extra cost.")):"Tick a service to see your figures.";
+    document.getElementById("r1").setAttribute("aria-pressed",route===1);
+    document.getElementById("r2").setAttribute("aria-pressed",route===2);
+  }
+  document.getElementById("r1").addEventListener("click",function(){route=1;render();});
+  document.getElementById("r2").addEventListener("click",function(){route=2;render();});
+  render();
+})();
+</script>
+
+</body></html>
