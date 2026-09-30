@@ -9,8 +9,11 @@
 <style>
 body{margin:0;background:#F4F4F4;font-family:Nunito,Arial,sans-serif;color:#001F3F;line-height:1.55}
 .wrap{max-width:640px;margin:0 auto;padding:24px 16px}
-.head{background:#211A4E;padding:20px;text-align:center;border-radius:8px 8px 0 0}
-.head img{height:44px;margin:4px 12px;vertical-align:middle}
+.head{display:flex;background:#16174B;border-radius:8px 8px 0 0;overflow:hidden}
+.head a{flex:1;display:flex;align-items:center;justify-content:center}
+.head img{width:100%;height:auto;display:block}
+.head a.i{background:#0F3D56}
+.head a.i img{width:70%}
 .card{background:#FDF8F2;padding:28px 24px;border-radius:0 0 8px 8px}
 h1{font-size:24px;margin:0 0 12px}
 h2{font-size:17px;margin:24px 0 6px}
@@ -26,12 +29,12 @@ button{background:#001F3F;color:#fff;border:0;border-radius:6px;padding:14px 26p
 <body>
 <div class="wrap">
 <div class="head">
-<a href="https://www.ebac.co.za"><img src="https://www.ebac.co.za/images/elevate-business-academy.png" alt="Elevate Business Academy"></a>
-<a href="https://infodocs.co.za"><img src="https://www.ebac.co.za/images/infodocs-logo-white-navy-background.png" alt="InfoDocs"></a>
+<a href="https://www.ebac.co.za"><img src="https://www.ebac.co.za/images/elevate-business-academy-lanscape.png" alt="Elevate Business Academy"></a>
+<a class="i" href="https://infodocs.co.za"><img src="https://www.ebac.co.za/images/infodocs-logo-white-navy-background.png" alt="InfoDocs"></a>
 </div>
 <div class="card">
 <h1>Permission to email you</h1>
-<p>You are one step from receiving emails about compliance services you can add to your practice. Confirm below and tell us who you are.</p>
+<p>You are one step from receiving emails about compliance services you can add to your practice. Confirm below and tell us who you are. Your thank-you is the South African Annual Compliance Tracker, a free workbook you can download on the next page.</p>
 
 <h2>Who is asking</h2>
 <p>Get Sharp Academy (Pty) Ltd, trading as Elevate Business Academy, is the responsible party under POPIA. It sends the emails together with InfoDocs and LexNova SA.</p>
@@ -53,7 +56,7 @@ button{background:#001F3F;color:#fff;border:0;border-radius:6px;padding:14px 26p
 <ul>
 <li>Every email has an unsubscribe link. One click stops all emails.</li>
 <li>You can ask us to see, correct or delete your details at any time.</li>
-<li>Contact: [[INFORMATION_OFFICER_EMAIL]]</li>
+<li>Contact: <a href="mailto:info@ebac.co.za">info@ebac.co.za</a></li>
 <li>You can also complain to the Information Regulator at inforeg.org.za.</li>
 </ul>
 
